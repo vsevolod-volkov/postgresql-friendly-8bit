@@ -20,12 +20,13 @@ static char *friendly_8bit_directory = "";
 static char *friendly_8bit_default_byte = "?";
 static char *friendly_8bit_default_unicode = "?";
 static char *friendly_8bit_trace = "";
+static int friendly_8bit_trace_level = 0;
 static pthread_mutex_t mutex;
 
 Datum byte_to_utf8(PG_FUNCTION_ARGS) {
 	int encoding = PG_GETARG_INT32(0);
 	unsigned char *src = (unsigned char *) PG_GETARG_CSTRING(2);
-	// const unsigned char *srcStart = src;
+	const unsigned char *srcStart = src;
 	const unsigned char *srcEnd = src + PG_GETARG_INT32(4);
 	unsigned char *dest = (unsigned char *) PG_GETARG_CSTRING(3);
 	const unsigned char *destStart = dest;
@@ -72,8 +73,8 @@ Datum byte_to_utf8(PG_FUNCTION_ARGS) {
 			}
 		}
 	}
-// *dest = '\0';
-// trace("byte_to_utf8(\"%s\"): \"%s\"", srcStart, destStart)
+	*dest = '\0';
+	trace(5, "byte_to_utf8(\"%s\"): \"%s\"", srcStart, destStart)
 	PG_RETURN_INT32(dest - destStart);
 }
 
@@ -133,8 +134,8 @@ Datum utf8_to_byte(PG_FUNCTION_ARGS) {
 		}
 	}
 
-// *dest = '\0';
-// trace("utf8_to_byte(\"%s\"): \"%s\"", srcStart, destStart)
+	*dest = '\0';
+	trace(5, "utf8_to_byte(\"%s\"): \"%s\"", srcStart, destStart)
 	PG_RETURN_INT32(dest - destStart);
 }
 
@@ -165,12 +166,12 @@ static int filter_f8b(const struct dirent *dirent) {
 }
 
 static int load_f8b(const char *name, int encoding) {
-	trace("START load_f8b(\"%s\", %d)", name, encoding);
+	trace(1, "START load_f8b(\"%s\", %d)", name, encoding);
 
 	FILE *f = fopen(name, "r");
 
 	if( !f ) {
-		trace("Can not open \"%s\" file.", name);
+		trace(1, "Can not open \"%s\" file.", name);
 		elog(WARNING, "Can not open \"%s\" file.", name);
 		return 0;
 	}
@@ -181,7 +182,7 @@ static int load_f8b(const char *name, int encoding) {
 
 		if( getline(&line, &len, f) < 0 ) {
 			if( errno ) {
-				trace("Can not read from \"%s\" file.", name);
+				trace(1, "Can not read from \"%s\" file.", name);
 				elog(WARNING, "Can not read from \"%s\" file.", name);
 				break;
 			} else {
@@ -193,7 +194,7 @@ static int load_f8b(const char *name, int encoding) {
 
 		if( sscanf(line, "%i %i", &byte, &unicode) == 2 ) {
 			if( byte < 1 || byte > 255 ) {
-				trace("Single-byte character code %d (0x%d) occured in codepage while expected in 1...255 range. Ignored.", byte, byte);
+				trace(1, "Single-byte character code %d (0x%d) occured in codepage while expected in 1...255 range. Ignored.", byte, byte);
 				ereport(WARNING, (
 					errcode(ERRCODE_INTERNAL_ERROR),
 					errmsg("Single-byte character code %d (0x%d) occured in codepage while expected in 1...255 range. Ignored.", byte, byte)
@@ -202,7 +203,7 @@ static int load_f8b(const char *name, int encoding) {
 			}
 
 			if( unicode < 1 ) {
-				trace("Unicode character scalar code %d (0x%d) occured in codepage while expected positive. Ignored.", unicode, unicode);
+				trace(1, "Unicode character scalar code %d (0x%d) occured in codepage while expected positive. Ignored.", unicode, unicode);
 				ereport(WARNING, (
 					errcode(ERRCODE_INTERNAL_ERROR),
 					errmsg("Unicode character scalar code %d (0x%d) occured in codepage while expected positive. Ignored.", unicode, unicode)
@@ -213,7 +214,7 @@ static int load_f8b(const char *name, int encoding) {
 			const char *message = add_codepage_patch(encoding, byte, unicode);
 
 			if( message ) {
-				trace("Adding conversion single byte %d (0x%d) and unicode %d (0x%d) caused error \"%s\". Ignored.", byte, byte, unicode, unicode, message);
+				trace(1, "Adding conversion single byte %d (0x%d) and unicode %d (0x%d) caused error \"%s\". Ignored.", byte, byte, unicode, unicode, message);
 				ereport(WARNING, (
 					errcode(ERRCODE_INTERNAL_ERROR),
 					errmsg("Adding conversion single byte %d (0x%d) and unicode %d (0x%d) caused error \"%s\". Ignored.", byte, byte, unicode, unicode, message)
@@ -224,7 +225,7 @@ static int load_f8b(const char *name, int encoding) {
 	}
 
 	fclose(f);
-	trace("END load_f8b(\"%s\", %d)", name, encoding);
+	trace(1, "END load_f8b(\"%s\", %d)", name, encoding);
 	return 1;
 }
 
@@ -285,6 +286,21 @@ void _PG_init() {
 		NULL // show_hook
 	);
 
+	DefineCustomIntVariable(
+		"friendly_8bit.trace_level", //name
+		"Trace level from 0=off to 10=verbose.", // short_desc
+		NULL, // long_desc
+		&friendly_8bit_trace_level, // valueAddr
+		0, // bootValue
+		0, // minValue,
+		10, // maxValue
+		PGC_SIGHUP, // context
+		0, // flags
+		NULL, // check_hook
+		NULL, // assign_hook
+		NULL // show_hook
+	);
+
 	int dirlen = strlen(friendly_8bit_directory);
 	char dir[dirlen + 2];
 	strcpy(dir, friendly_8bit_directory);
@@ -292,28 +308,28 @@ void _PG_init() {
 		strcat(dir, "/");
 	dirlen = strlen(dir);
 
-	if( strlen(friendly_8bit_trace) ) {
+	if( strlen(friendly_8bit_trace) && friendly_8bit_trace_level > 0) {
 		elog(NOTICE, "friendly_8bit.trace = \"%s\"", friendly_8bit_trace);
-		trace_open(friendly_8bit_trace);
+		trace_open(friendly_8bit_trace, friendly_8bit_trace_level);
 	}
 
-	trace("START _PG_init()", 0);
+	trace(1, "START _PG_init()", 0);
 
 	elog(NOTICE, "_PG_init()");
 
-	trace("friendly_8bit.directory = \"%s\"", friendly_8bit_directory);
-	trace("friendly_8bit.default_byte = \"%s\"", friendly_8bit_default_byte);
-	trace("friendly_8bit.default_unicode = \"%s\"", friendly_8bit_default_unicode);
-	trace("friendly_8bit.trace = \"%s\"", friendly_8bit_trace);
+	trace(2, "friendly_8bit.directory = \"%s\"", friendly_8bit_directory);
+	trace(2, "friendly_8bit.default_byte = \"%s\"", friendly_8bit_default_byte);
+	trace(2, "friendly_8bit.default_unicode = \"%s\"", friendly_8bit_default_unicode);
+	trace(2, "friendly_8bit.trace = \"%s\"", friendly_8bit_trace);
 
    if( strlen(friendly_8bit_directory) ) {
 		struct dirent **dirent;
 		int name_count = scandir(friendly_8bit_directory, &dirent, filter_f8b, alphasort);
 
-		trace("Directory contains %d items.", name_count);
+		trace(6, "Directory contains %d items.", name_count);
 
 		if( name_count < 0) {
-			trace("Can not list \"%s\" directory contents.", friendly_8bit_directory);
+			trace(1, "Can not list \"%s\" directory contents.", friendly_8bit_directory);
 			elog(NOTICE, "Can not list \"%s\" directory contents.", friendly_8bit_directory);
 		} else {
 			for(size_t i = 0; i < name_count; i++) {
@@ -327,12 +343,12 @@ void _PG_init() {
 			free(dirent);
 		}
 	}
-	trace("END _PG_init()", 0);
+	trace(1, "END _PG_init()", 0);
 	pthread_mutex_unlock(&mutex);
 }
 
 void _PG_fini() {
-	trace("_PG_fini()", 0);
+	trace(1, "_PG_fini()", 0);
 	pthread_mutex_lock(&mutex);
 	destroy_codepages();
 	pthread_mutex_unlock(&mutex);

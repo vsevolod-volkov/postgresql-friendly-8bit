@@ -50,7 +50,7 @@ const char* add_codepage_patch(int encoding, unsigned char byte, pg_wchar unicod
    Byte3Map *byte3Map = patch->byte4Map[byte4];
 
    if( !byte3Map ) {
-      trace("Add byte 3 map for byte 4: %02X", (int) byte4);
+      trace(4, "Add byte 3 map for byte 4: %02X", (int) byte4);
       byte3Map = malloc(sizeof(Byte3Map));
       memset(byte3Map, 0, sizeof(Byte3Map));
       patch->byte4Map[byte4] = byte3Map;
@@ -59,7 +59,7 @@ const char* add_codepage_patch(int encoding, unsigned char byte, pg_wchar unicod
    Byte2Map *byte2Map = (*byte3Map)[byte3];
 
    if( !byte2Map ) {
-      trace("Add byte 2 map for byte 3: %02X, byte 4: %02X", (int) byte3, (int) byte4);
+      trace(4, "Add byte 2 map for byte 3: %02X, byte 4: %02X", (int) byte3, (int) byte4);
       byte2Map = malloc(sizeof(Byte2Map));
       memset(byte2Map, 0, sizeof(Byte2Map));
       (*byte3Map)[byte3] = byte2Map;
@@ -68,7 +68,7 @@ const char* add_codepage_patch(int encoding, unsigned char byte, pg_wchar unicod
    Byte1Map *byte1Map = (*byte2Map)[byte2];
 
    if( !byte1Map ) {
-      trace("Add byte 1 map for byte 2: %02X, byte 3: %02X, byte 4: %02X", (int) byte2, (int) byte3, (int) byte4);
+      trace(4, "Add byte 1 map for byte 2: %02X, byte 3: %02X, byte 4: %02X", (int) byte2, (int) byte3, (int) byte4);
       byte1Map = malloc(sizeof(Byte1Map));
       memset(byte1Map, 0, sizeof(Byte1Map));
       (*byte2Map)[byte2] = byte1Map;

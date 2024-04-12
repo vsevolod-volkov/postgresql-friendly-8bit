@@ -33,7 +33,7 @@ unzip 0.1.zip
 cd postgresql-friendly-8bit-0.1
 ```
 
-## Build
+## Build **conv_friendly_8bit.so**
 ### Using make
 ```bash
 make # build conv_friendly_8bit.so shared library
@@ -60,8 +60,12 @@ make clean # remove object files and library
 |friendly_8bit.default_byte|UTF8 string|No|Pirate flag Emoji symbol|UTF-8 sequence to be used instead of any character absent in byte-to-UNICODE conversion. Allows to use single integer type compatible %-modifier in C printf() format such as %d or %x like "[U+0%X]".|
 |friendly_8bit.default_unicode|byte string|No|"?"|Byte character string to be used instead of any character absent in UNICODE-to-byte conversion. Allows to use single integer type compatible %-modifier in C printf() format such as %d or %x like "[\\\\x%02X]".|
 |friendly_8bit.trace|string (path)|No|-|Is set, sets full path to trace file where trace to be save|
+|friendly_8bit.trace_level|integer|No|0|Trace level from 0=off to 10=verbose.|
 
 # Database setup
+## Put shared library to PostgreSQL server
+**conv_friendly_8bit.so** file produced as result of source build must be placed to porper directory and must be accessable to PostgreSQL server processes. Please read https://www.postgresql.org/docs/current/sql-load.html topic to get more information about shared library loading in PostgreSQL.
+
 ## Create conversion functions
 ```PostgreSQL
 CREATE FUNCTION friendly_byte_to_utf8(
