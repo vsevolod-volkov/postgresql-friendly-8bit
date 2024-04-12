@@ -13,10 +13,10 @@ typedef Byte3Map* Byte4Map[256];
 typedef pg_wchar SingleByteMap[256];
 
 static inline size_t utf8_len(unsigned char ch) {
-	return (!ch & 0x80) ? 1 :
-		(ch & 0xe0 == 0xc0) ? 2 :
-		(ch & 0xf0 == 0xe0) ? 3 :
-		(ch & 0xf8 == 0xf0) ? 4 :
+	return !(ch & 0x80) ? 1 :
+		((ch & 0xe0) == 0xc0) ? 2 :
+		((ch & 0xf0) == 0xe0) ? 3 :
+		((ch & 0xf8) == 0xf0) ? 4 :
 		1;
 }
 

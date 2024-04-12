@@ -24,7 +24,7 @@ while [ -n "$1" ]; do
 done
 
 if [ "$docker" = "yes" ]; then
-   docker run $platform --interactive --tty --rm --volume .:/project $(docker build $platform --quiet docker/) make
+   docker run $platform --interactive --tty --rm --volume $(pwd):/project $(docker build $platform --quiet docker/) make
 else
    make
 fi

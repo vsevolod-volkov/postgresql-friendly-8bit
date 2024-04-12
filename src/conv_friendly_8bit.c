@@ -234,7 +234,7 @@ void _PG_init() {
 
 	DefineCustomStringVariable(
 		"friendly_8bit.directory", //name
-		"Directory path where friendly_8bit project finds codepage configuration files", // short_desc
+		"Directory path where friendly_8bit project finds codepage configuration files.", // short_desc
 		NULL, // long_desc
 		&friendly_8bit_directory, // valueAddr
 		"", // bootValue
@@ -248,8 +248,8 @@ void _PG_init() {
 	static const unsigned char default_byte[] = { 0xF0, 0x9F, 0x8F, 0xB4, 0xE2, 0x80, 0x8D, 0xE2, 0x98, 0xA0, 0xEF, 0xB8, 0x8F, 0 };
 	DefineCustomStringVariable(
 		"friendly_8bit.default_byte", //name
-		"UTF-8 sequence to be used instead of any character absent in byte-to-UNICODE conversion", // short_desc
-		NULL, // long_desc
+		"UTF-8 sequence to be used instead of any character absent in byte-to-UNICODE conversion.", // short_desc
+		"UTF-8 sequence to be used instead of any character absent in byte-to-UNICODE conversion. Allows to use single integer type compatible %-modifier in C printf() format such as %d or %x like \"[U+0%X]\".", // long_desc
 		&friendly_8bit_default_byte, // valueAddr
 		(const char*) &default_byte, // bootValue
 		PGC_SIGHUP, // context
@@ -261,8 +261,8 @@ void _PG_init() {
 
 	DefineCustomStringVariable(
 		"friendly_8bit.default_unicode", //name
-		"Single-character scring to be used instead of any character absent in UNICODE-to-byte conversion", // short_desc
-		NULL, // long_desc
+		"Byte character string to be used instead of any character absent in UNICODE-to-byte conversion.", // short_desc
+		"Byte character string to be used instead of any character absent in UNICODE-to-byte conversion. Allows to use single integer type compatible %-modifier in C printf() format such as %d or %x like \"[\\x%02X]\".", // long_desc
 		&friendly_8bit_default_unicode, // valueAddr
 		"?", // bootValue
 		PGC_SIGHUP, // context
@@ -274,7 +274,7 @@ void _PG_init() {
 
 	DefineCustomStringVariable(
 		"friendly_8bit.trace", //name
-		"Optional full path to trace file", // short_desc
+		"Optional full path to trace file.", // short_desc
 		NULL, // long_desc
 		&friendly_8bit_trace, // valueAddr
 		"", // bootValue
