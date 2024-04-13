@@ -6,7 +6,7 @@
 3) Allows to define %-based fprintf() format conversion for non-reflecting characters.
 
 ## Prepare system for build
-Skip this unit if you decide to build using docker.
+Skip this unit if you decide to build using docker. Assume docker is already instaled.
 ### macOS
 ```bash
 brew install gcc postgresql@15
@@ -20,6 +20,17 @@ sudo apt-get update -y
 sudo apt-get install -y postgresql-server-dev-15
 ```
 
+### Fedora/CentOS/RedHat/Oracle Linux
+Please refer to [officiasl PostgreSQL installation guides](https://www.postgresql.org/download/linux/redhat/).
+```bash
+sudo yum install -y build-essential gcc git
+sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm # CentOS-specific
+sudo yum install -y llvm5.0-devel # CentOS-specific
+sudo yum install -y centos-release-scl-rh # CentOS-specific
+sudo yum install -y postgresql15-devel
+echo 'export PATH=$PATH:/usr/pgsql-15/bin/' >> ~/.bash_profile
+```
 ## Obtain sources
 ### Using git
 ```bash
