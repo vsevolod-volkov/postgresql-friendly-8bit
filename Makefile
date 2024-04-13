@@ -21,7 +21,8 @@ conv_friendly_8bit.so: conv_friendly_8bit.o utf8_util.o trace.o
          $^ \
 		|| \
       cc \
-		   -fPIC \
+         -fPIC \
+         -std=gnu99 \
          -I `pg_config --includedir-server` -I include \
          -c \
          -o $@ \

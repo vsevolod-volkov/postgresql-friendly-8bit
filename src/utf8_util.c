@@ -142,13 +142,13 @@ void destroy_codepages() {
       for(size_t b4=0; b4 < 256; b4++ ) {
          if( !patch->byte4Map[b4] ) continue;
          for(size_t b3=0; b3 < 256; b3++ ) {
-            const Byte3Map *byte3Map = patch->byte4Map[b3];
+            Byte3Map *byte3Map = patch->byte4Map[b3];
             if( !byte3Map ) continue;
             for(size_t b2=0; b2 < 256; b2++ ) {
-               const Byte2Map *byte2Map = (*byte3Map)[b2];
+               Byte2Map *byte2Map = (*byte3Map)[b2];
                if( !byte2Map ) continue;
                for(size_t b1=0; b1 < 256; b1++ ) {
-                  const Byte1Map *byte1Map = (*byte2Map)[b1];
+                  Byte1Map *byte1Map = (*byte2Map)[b1];
                   if( !byte1Map ) continue;
                   free((void*) byte1Map);
                }
