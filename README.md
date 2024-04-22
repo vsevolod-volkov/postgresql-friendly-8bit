@@ -97,7 +97,7 @@ Codepage file must contains lines in format of two integers separated by space. 
 For example, all three cases below represent the same character code of decimal 123:
 - 123 - decimal
 - 0x7B - hexadecimal
-- 0173
+- 0173 - octal
 
 Any line in codepage file that does not contain two character codes in specified format will be ignored. So you may prepend comment lines with sharp sign and write freeform remarks or separate codepage section with empty lines.
 
@@ -129,7 +129,7 @@ CREATE FUNCTION friendly_utf8_to_byte(
     integer,  -- source string length
     boolean   -- if true, don't throw an error if conversion fails
 ) RETURNS integer
-     AS '/full/path/to/shared/library/conv_friendly_8bit', 'utf8_to_byte' LANGUAGE C STRICT;
+     AS '/full/path/to/shared/library/conv_friendly_8bit', 'utf8_to_byte' LANGUAGE C IMMUTABLE STRICT;
 ```
 ## Turn off default flag of existent conversions
 ```sql
