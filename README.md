@@ -132,7 +132,7 @@ CREATE FUNCTION friendly_utf8_to_byte(
 ) RETURNS integer
      AS '/full/path/to/shared/library/conv_friendly_8bit', 'utf8_to_byte' LANGUAGE C IMMUTABLE STRICT;
 ```
-Even if you prefer to delegate function creation to native user, you should mark "C" language and grant its usage to native user under postgres administrative user with such queries:
+Even if you prefer to delegate function creation to native user, you should mark "C" language as trusted one and grant its usage to native user under postgres administrative user with such queries:
 ```sql
 UPDATE pg_language
     SET
