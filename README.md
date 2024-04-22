@@ -110,6 +110,7 @@ Please find codepage file example [here](codepages/WIN1251.f8b).
 **conv_friendly_8bit.so** file produced as result of source build must be placed to porper directory and must be accessable to PostgreSQL server processes. Please read https://www.postgresql.org/docs/current/sql-load.html topic to get more information about shared library loading in PostgreSQL.
 
 ## Create conversion functions
+Most likely those queries to be run under postgres administrative user:
 ```sql
 CREATE FUNCTION friendly_byte_to_utf8(
     integer,  -- source encoding ID
@@ -131,7 +132,18 @@ CREATE FUNCTION friendly_utf8_to_byte(
 ) RETURNS integer
      AS '/full/path/to/shared/library/conv_friendly_8bit', 'utf8_to_byte' LANGUAGE C IMMUTABLE STRICT;
 ```
+Even if you prefer to delegate function creation to native user, you should mark "C" language and grant its usage to native user under postgres administrative user with such queries:
+```sql
+UPDATE pg_language
+    SET
+        lanpltrusted = true
+    WHERE
+        lanname = 'c';
+
+GRANT USAGE ON LANGUAGE c TO someuser;
+```
 ## Turn off default flag of existent conversions
+Most likely to be run under postgres administrative user:
 ```sql
 UPDATE pg_conversion SET condefault = false WHERE conname IN ('windows_1251_to_utf8', 'utf8_to_windows_1251');
 ```
